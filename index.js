@@ -35,12 +35,18 @@ const getDistribution = (numberOfQuestions, strands) => {
   const strandKeys = Object.keys(strands);
   const numberOfStrands = strandKeys.length;
 
-  const questionsPerStrand = Math.floor(numberOfQuestions / numberOfStrands);
-  const extraQuestion = numberOfQuestions % numberOfStrands;
+  const questionsPerStrand = Math.ceil(numberOfQuestions / numberOfStrands);
 
   const questions = strandKeys.reduce((acc, key) => {
     const strand = strands[key];
     const standardKeys = Object.keys(strand);
+    const longestStandard = standardKeys.reduce((acc, standardKey) => {
+      const numberOfQuestionsInStandard = strand[standardKey].length;
+      if (numberOfQuestionsInStandard > acc) {
+        return numberOfQuestionsInStandard;
+      }
+      return acc;
+    }, 0);
 
     let standardQuestions = [];
     let currentQuestionIndex = 0;
@@ -63,12 +69,31 @@ const getDistribution = (numberOfQuestions, strands) => {
       );
 
       currentQuestionIndex = currentQuestionIndex + 1;
+      if (currentQuestionIndex === longestStandard) {
+        currentQuestionIndex = 0;
+      }
     }
 
-    return r.concat(acc, standardQuestions);
+    return r.append(standardQuestions, acc);
   }, []);
 
-  return questions;
+  let result = questions;
+
+  const extraQuestions =
+    questions.reduce((acc, cur) => acc + cur.length, 0) - numberOfQuestions;
+  if (extraQuestions > 0) {
+    let totalRemoved = 0;
+    result = questions.map(questionsForStandard => {
+      if (totalRemoved === extraQuestions) {
+        return questionsForStandard;
+      }
+
+      totalRemoved = totalRemoved + 1;
+      return questionsForStandard.slice(0, -1);
+    });
+  }
+
+  return result.reduce((acc, cur) => r.concat(acc, cur), []);
 };
 
 // SOLUTION
@@ -87,9 +112,13 @@ const solve = () => {
   }
 
   const distribution = getDistribution(numberOfQuestions, hardcodedData);
-  const questionsList = r.pipe(r.map(([id, _]) => id), r.join(','))(
-    distribution,
-  );
+
+  const questionsList = r.pipe(
+    r.sortBy(([_, difficulty]) => difficulty), // If there are duplicates, this sorts them to be right next to each other
+    r.map(([id, _]) => id),
+    r.join(','),
+  )(distribution);
+
   console.log(questionsList);
 };
 
