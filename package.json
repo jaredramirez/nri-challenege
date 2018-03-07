@@ -1,0 +1,12 @@
+{
+  "dependencies": {
+    "rambda": "^1.0.12",
+    "ramda": "^0.25.0"
+  },
+  "name": "interview1",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/jaredramirez/nri-challenege.git",
+  "author": "jaredramirez <jaredramirez@me.com>",
+  "license": "MIT"
+}

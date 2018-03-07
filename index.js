@@ -1,3 +1,5 @@
+const r = require('ramda');
+
 // HARDCODED DATA
 
 const hardcodedData = {
@@ -15,6 +17,11 @@ const hardcodedData = {
 
 // HELPERS
 
+const log = (s, v) => {
+  console.log(s, v);
+  return v;
+};
+
 const stringToNumber = s => {
   const n = parseInt(s);
   if (isNaN(n)) {
@@ -24,19 +31,44 @@ const stringToNumber = s => {
   return n;
 };
 
-const getDistribution = (numberOfQuestions, data) => {
-  const dataKeys = Object.keys(data);
-  const numberOfStrands = dataKeys.length;
-  const mod = numberOfQuestions % numberOfStrands;
+const getDistribution = (numberOfQuestions, strands) => {
+  const strandKeys = Object.keys(strands);
+  const numberOfStrands = strandKeys.length;
 
-  if (mod === 0) {
-    // Questions divides # of strands evenly
-    const questions = dataKeys.reduce((acc, key) => {
-      const strand = dataKeys[key];
-    }, []);
-  } else {
-    console.log('unimplemented');
-  }
+  const questionsPerStrand = Math.floor(numberOfQuestions / numberOfStrands);
+  const extraQuestion = numberOfQuestions % numberOfStrands;
+
+  const questions = strandKeys.reduce((acc, key) => {
+    const strand = strands[key];
+    const standardKeys = Object.keys(strand);
+
+    let standardQuestions = [];
+    let currentQuestionIndex = 0;
+    let createdQuestions = 0;
+
+    while (createdQuestions < questionsPerStrand) {
+      standardQuestions = r.concat(
+        standardQuestions,
+        standardKeys.reduce((questionsAcc, standardKey) => {
+          const standard = strand[standardKey];
+          const question = standard[currentQuestionIndex];
+
+          if (!question || createdQuestions === questionsPerStrand) {
+            return questionsAcc;
+          }
+
+          createdQuestions = createdQuestions + 1;
+          return [...questionsAcc, question];
+        }, []),
+      );
+
+      currentQuestionIndex = currentQuestionIndex + 1;
+    }
+
+    return r.concat(acc, standardQuestions);
+  }, []);
+
+  return questions;
 };
 
 // SOLUTION
@@ -55,7 +87,10 @@ const solve = () => {
   }
 
   const distribution = getDistribution(numberOfQuestions, hardcodedData);
-  console.log(distribution);
+  const questionsList = r.pipe(r.map(([id, _]) => id), r.join(','))(
+    distribution,
+  );
+  console.log(questionsList);
 };
 
 solve();
