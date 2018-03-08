@@ -69,6 +69,7 @@ const getDistribution = (numberOfQuestions, strands) => {
   const questionsPerStrand = Math.ceil(numberOfQuestions / numberOfStrands);
 
   const questions = strands.reduce((acc, curStrand) => {
+    // Get the maximumn number of question in this standard
     const longestStandard = curStrand.standards.reduce((acc, curStandard) => {
       if (curStandard.questions.length > acc) {
         return curStandard.questions.length;
@@ -80,6 +81,9 @@ const getDistribution = (numberOfQuestions, strands) => {
     let currentQuestionIndex = 0;
     let createdQuestions = 0;
 
+    // Loop & pull the a question out of each standard in the strand until
+    // the number of questions for this strand has been met (we air on the side
+    // of extra questions, then remove them later)
     while (createdQuestions < questionsPerStrand) {
       standardQuestions = r.concat(
         standardQuestions,
@@ -106,6 +110,10 @@ const getDistribution = (numberOfQuestions, strands) => {
 
   let result = questions;
 
+  // If the number of strands did not divide the number of questions evenly,
+  // we air of the side of creating too many questions per strand. Then
+  // we check if we created to many, and remove an the equal number of questions
+  // from each standard
   const extraQuestions =
     questions.reduce((acc, cur) => acc + cur.length, 0) - numberOfQuestions;
   if (extraQuestions > 0) {
@@ -120,6 +128,7 @@ const getDistribution = (numberOfQuestions, strands) => {
     });
   }
 
+  // Since we sort in groups by strands, we concat these into one list
   return result.reduce((acc, cur) => r.concat(acc, cur), []);
 };
 
@@ -140,6 +149,7 @@ const solve = () => {
 
   const distribution = getDistribution(numberOfQuestions, hardcodedData);
 
+  // We sort the questions by difficulty, map to get the ids, then format it
   const questionsList = r.pipe(
     r.sortBy(([_, difficulty]) => difficulty), // If there are duplicates, this sorts them to be right next to each other
     r.map(([id, _]) => id),
