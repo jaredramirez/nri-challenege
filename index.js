@@ -2,18 +2,50 @@ const r = require('ramda');
 
 // HARDCODED DATA
 
-const hardcodedData = {
-  nouns: {
-    commonNouns: [[1, 0.7], [2, 0.6]],
-    abstractNouns: [[3, 0.8]],
-    properNouns: [[4, 0.2], [5, 0.5], [6, 0.4]],
+const hardcodedData = [
+  {
+    id: 1,
+    name: 'Nouns',
+    standards: [
+      {
+        id: 1,
+        name: 'Common Nouns',
+        questions: [[1, 0.7], [2, 0.6]],
+      },
+      {
+        id: 2,
+        name: 'Abstract Nouns',
+        questions: [[3, 0.8]],
+      },
+      {
+        id: 3,
+        name: 'Proper Nouns',
+        questions: [[4, 0.2], [5, 0.5], [6, 0.4]],
+      },
+    ],
   },
-  verbs: {
-    action: [[6, 0.9], [7, 0.1]],
-    transative: [[8, 0.3], [9, 0.6], [10, 0.4]],
-    reflexive: [[11, 0.4], [12, 0.2]],
+  {
+    id: 2,
+    name: 'Verbs',
+    standards: [
+      {
+        id: 4,
+        name: 'Action Verbs',
+        questions: [[6, 0.9], [7, 0.1]],
+      },
+      {
+        id: 4,
+        name: 'Transative Verbs',
+        questions: [[9, 0.3], [10, 0.6], [11, 0.4]],
+      },
+      {
+        id: 5,
+        name: 'Reflexive Verbs',
+        questions: [[12, 0.2]],
+      },
+    ],
   },
-};
+];
 
 // HELPERS
 
@@ -32,18 +64,14 @@ const stringToNumber = s => {
 };
 
 const getDistribution = (numberOfQuestions, strands) => {
-  const strandKeys = Object.keys(strands);
-  const numberOfStrands = strandKeys.length;
+  const numberOfStrands = strands.length;
 
   const questionsPerStrand = Math.ceil(numberOfQuestions / numberOfStrands);
 
-  const questions = strandKeys.reduce((acc, key) => {
-    const strand = strands[key];
-    const standardKeys = Object.keys(strand);
-    const longestStandard = standardKeys.reduce((acc, standardKey) => {
-      const numberOfQuestionsInStandard = strand[standardKey].length;
-      if (numberOfQuestionsInStandard > acc) {
-        return numberOfQuestionsInStandard;
+  const questions = strands.reduce((acc, curStrand) => {
+    const longestStandard = curStrand.standards.reduce((acc, curStandard) => {
+      if (curStandard.questions.length > acc) {
+        return curStandard.questions.length;
       }
       return acc;
     }, 0);
@@ -55,9 +83,8 @@ const getDistribution = (numberOfQuestions, strands) => {
     while (createdQuestions < questionsPerStrand) {
       standardQuestions = r.concat(
         standardQuestions,
-        standardKeys.reduce((questionsAcc, standardKey) => {
-          const standard = strand[standardKey];
-          const question = standard[currentQuestionIndex];
+        curStrand.standards.reduce((questionsAcc, curStandard) => {
+          const question = curStandard.questions[currentQuestionIndex];
 
           if (!question || createdQuestions === questionsPerStrand) {
             return questionsAcc;
@@ -112,6 +139,7 @@ const solve = () => {
   }
 
   const distribution = getDistribution(numberOfQuestions, hardcodedData);
+  console.log(distribution.length);
 
   const questionsList = r.pipe(
     r.sortBy(([_, difficulty]) => difficulty), // If there are duplicates, this sorts them to be right next to each other
