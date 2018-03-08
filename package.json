@@ -1,6 +1,5 @@
 {
   "dependencies": {
-    "rambda": "^1.0.12",
     "ramda": "^0.25.0"
   },
   "name": "interview1",

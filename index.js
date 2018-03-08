@@ -1,6 +1,6 @@
 const r = require('ramda');
 
-// HARDCODED DATA
+// DATA
 
 const hardcodedData = [
   {
@@ -139,7 +139,6 @@ const solve = () => {
   }
 
   const distribution = getDistribution(numberOfQuestions, hardcodedData);
-  console.log(distribution.length);
 
   const questionsList = r.pipe(
     r.sortBy(([_, difficulty]) => difficulty), // If there are duplicates, this sorts them to be right next to each other
